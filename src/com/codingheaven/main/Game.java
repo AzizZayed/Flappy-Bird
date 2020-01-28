@@ -14,20 +14,26 @@ public class Game extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Game dimensions, in pixels
+	 */
 	public final static int WIDTH = 350;
 	public final static int HEIGHT = 500;
 
-	public final static float kGRAVITY = -4.0f;
+	public final static float kGRAVITY = -4.0f; // gravity constant
 
-	public boolean running = false; // true if the game is running
+	public boolean running = false; // true if the game loop is running
 	private Thread gameThread; // thread where the game is updated AND rendered (single thread game)
 
-	public boolean gameStarted = false;
+	public boolean gameStarted = false; // true if game has started
 
 	// Game properties...
 	private Bird bird;
 	private PipesHandler pipes;
 
+	/**
+	 * Constructor
+	 */
 	public Game() {
 
 		canvasSetup();
@@ -35,26 +41,11 @@ public class Game extends Canvas implements Runnable {
 
 		newWindow();
 
-		this.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				int code = e.getKeyCode();
-
-				if (code == KeyEvent.VK_SPACE || code == KeyEvent.VK_UP) {
-					bird.jump(-5.5f * kGRAVITY); // go against gravity
-					if (!gameStarted)
-						gameStarted = true;
-				}
-
-			}
-
-		});
-
-		this.setFocusable(true);
-
 	}
 
+	/**
+	 * Setup JFrame where the canvas will be in
+	 */
 	private void newWindow() {
 		JFrame frame = new JFrame("Flappy Bird");
 
@@ -73,17 +64,35 @@ public class Game extends Canvas implements Runnable {
 	 */
 	private void initialize() {
 		// Initialize
-		bird = new Bird(this);
+		bird = new Bird();
 		pipes = new PipesHandler();
 	}
 
 	/**
-	 * just to setup the canvas to our desired settings and sizes
+	 * just to setup the canvas to our desired settings and sizes, setup events
 	 */
 	private void canvasSetup() {
 		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		this.setMaximumSize(new Dimension(WIDTH, HEIGHT));
 		this.setMinimumSize(new Dimension(WIDTH, HEIGHT));
+
+		this.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				int code = e.getKeyCode();
+
+				if (code == KeyEvent.VK_SPACE || code == KeyEvent.VK_UP) {
+					bird.jump(-5.5f * kGRAVITY); // go against gravity
+					if (!gameStarted)
+						gameStarted = true;
+				}
+
+			}
+
+		});
+
+		this.setFocusable(true);
 	}
 
 	/**
@@ -242,6 +251,9 @@ public class Game extends Canvas implements Runnable {
 			restart();
 	}
 
+	/**
+	 * restart the game
+	 */
 	public void restart() {
 		gameStarted = false;
 		initialize();

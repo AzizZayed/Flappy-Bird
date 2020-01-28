@@ -14,22 +14,25 @@ import javax.imageio.ImageIO;
 
 public class Bird {
 
-	private int x, y;
-	private int width, height;
-	private float yVelocity;
-	private double rotationAngle = Math.PI / 4; // 30 degrees
-	private boolean dying = false;
-	private int score = 0;
+	private int x, y; // position in 2D space
+	private int width, height; // Dimensions of the bird
+	private float yVelocity; // vertical velocity
+	private double rotationAngle = Math.PI / 4; // 30 degrees rotation for the bird
+	private boolean dying = false; // for dying animation
+	private int score = 0; // number of pipes past
 	private static int record = 0;
 
-	private final static short kANIMATION_IMAGES = 3;
-	private short imgWidth, imgHeight;
-	private final static short kSCALE = 2;
+	private final static short kANIMATION_IMAGES = 3; // number of pictures in the flying bird animation
+	private short imgWidth, imgHeight; // dimensions of the bird images
+	private final static short kSCALE = 2; // scale at which to draw the images
 	private short nAnimation = 0; // value between 0 and 2, defines which image to render from the 3 images we use
 									// for the animation
-	private BufferedImage animation[];
+	private BufferedImage animation[]; // images of the animation
 
-	public Bird(Game game) {
+	/**
+	 * Constructor
+	 */
+	public Bird() {
 		x = (int) (Game.WIDTH / 4);
 		y = (int) (Game.HEIGHT / 2.2);
 
@@ -37,12 +40,15 @@ public class Bird {
 	}
 
 	/**
-	 * @return the dying
+	 * @return if the bird is dying
 	 */
 	public boolean isDying() {
 		return dying;
 	}
 
+	/**
+	 * Setup the flapping bird animation, 3 images
+	 */
 	private void setupAnimation() {
 		animation = new BufferedImage[kANIMATION_IMAGES];
 
@@ -60,22 +66,36 @@ public class Bird {
 		width = imgWidth * kSCALE;
 		height = imgHeight * kSCALE;
 	}
-	
+
+	/**
+	 * Setup dying animation
+	 */
 	public void dyingAnimation() {
 		dying = true;
 
 		rotationAngle = Math.PI / 2;
 	}
 
+	/**
+	 * make the bird jump, called when the space bar is pressed
+	 * 
+	 * @param jumpForce, upwards velocity
+	 */
 	public void jump(float jumpForce) {
 		if (!dying)
 			yVelocity = jumpForce;
 	}
 
+	/**
+	 * @return the rectangle bounding the bird
+	 */
 	public Rectangle getBounds() {
 		return new Rectangle(x, y, width, height);
 	}
 
+	/**
+	 * increase score
+	 */
 	public void addPoint() {
 		score++;
 
@@ -83,14 +103,26 @@ public class Bird {
 			record = score;
 	}
 
+	/**
+	 * switch animation picture
+	 */
 	public void animate() {
 		nAnimation = (short) ((nAnimation + 1) % kANIMATION_IMAGES); // animate
 	}
 
+	/**
+	 * @return if the bird hit the floor or not
+	 */
 	public boolean hitFloor() {
 		return (y + height >= Game.HEIGHT);
 	}
 
+	/**
+	 * Draw the game
+	 * 
+	 * @param g,       tool to draw
+	 * @param started, draw according to if the game started or not
+	 */
 	public void draw(Graphics g, boolean started) {
 
 		if (!started) {
@@ -132,10 +164,20 @@ public class Bird {
 
 	}
 
+	/**
+	 * Draw the bird
+	 * 
+	 * @param g, tool to draw
+	 */
 	private void drawBird(Graphics g) {
 		g.drawImage(animation[nAnimation], x, y, width, height, null);
 	}
 
+	/**
+	 * Update the bird movement and physics
+	 * 
+	 * @param dt, delta time
+	 */
 	public void update(double dt) {
 		yVelocity += Game.kGRAVITY * dt;
 		y -= yVelocity;

@@ -10,25 +10,43 @@ import java.util.Random;
 
 public class PipesHandler {
 
-	public static final short kDISTANCE = 200;
-	public static final short AMOUNT = Game.WIDTH / kDISTANCE + 1;
+	public static final short kDISTANCE = 200; // distance between each pipe
+	public static final short AMOUNT = Game.WIDTH / kDISTANCE + 1; // amount of pipes to generate in memory to keep game
+																	// smooth
 
-	private ArrayList<PipeSet> pipes;
+	private ArrayList<PipeSet> pipes; // array of pipes, array list so we can add and remove
 
+	/**
+	 * Constructor
+	 */
 	public PipesHandler() {
 		initializeList();
 	}
 
+	/**
+	 * A set of pipes, top and bottom
+	 * 
+	 * @author Abd-El-Aziz Zayed
+	 *
+	 */
 	private class PipeSet {
 
+		/*
+		 * spacing between top and bottom pipe
+		 */
 		public static final int MAX_SPACING = 150;
 		public static final int MIN_SPACING = 100;
 
-		private Rectangle topPipe, bottomPipe;
-		private int pipeWidth = 55;
-		private boolean passedBird = false;
+		private Rectangle topPipe, bottomPipe; // pipes
+		private int pipeWidth = 55; // width
+		private boolean passedBird = false; // true if the current pipe set passed the bird
 		private float velocity = -5.0f;
 
+		/**
+		 * Constructor
+		 * 
+		 * @param x, starting position
+		 */
 		public PipeSet(int x) {
 			init(x);
 		}
@@ -40,6 +58,11 @@ public class PipesHandler {
 			return passedBird;
 		}
 
+		/**
+		 * Create the pipe set
+		 * 
+		 * @param x, where to create the pipe set
+		 */
 		public void init(int x) {
 			// initialize rectangles;
 			Random random = new Random();
@@ -56,20 +79,37 @@ public class PipesHandler {
 			passedBird = false;
 		}
 
+		/**
+		 * test if hit the bird
+		 * 
+		 * @param bird, bird to test on
+		 * @return true if bird was hit
+		 */
 		public boolean hitBird(Bird bird) {
 			Rectangle birdRect = bird.getBounds();
 
 			return (topPipe.intersects(birdRect) || bottomPipe.intersects(birdRect));
 		}
 
+		/**
+		 * @return x position of pipes
+		 */
 		public int getX() {
 			return (int) topPipe.getX();
 		}
 
+		/**
+		 * @return width of pipes
+		 */
 		public int getWidth() {
 			return pipeWidth;
 		}
 
+		/**
+		 * check if the pipes passed the bird
+		 * 
+		 * @param bird, bird to test on
+		 */
 		public void checkIfPassed(Bird bird) {
 			if (passedBird)
 				return;
@@ -80,6 +120,11 @@ public class PipesHandler {
 				bird.addPoint();
 		}
 
+		/**
+		 * Draw pipe set
+		 * 
+		 * @param g, tool to draw
+		 */
 		public void draw(Graphics g) {
 			Graphics2D g2d = (Graphics2D) g;
 
@@ -108,6 +153,9 @@ public class PipesHandler {
 
 		}
 
+		/**
+		 * update movement and physics, do collision test
+		 */
 		public void update() {
 			double x, y;
 			x = topPipe.getX();
@@ -122,6 +170,9 @@ public class PipesHandler {
 		}
 	}
 
+	/**
+	 * setup the list of initial pipe sets
+	 */
 	private void initializeList() {
 		pipes = new ArrayList<PipeSet>();
 		int x = Game.WIDTH + 200;
@@ -130,7 +181,12 @@ public class PipesHandler {
 			pipes.add(new PipeSet(x + kDISTANCE * i));
 		}
 	}
-	
+
+	/**
+	 * test the collision with the bird
+	 * 
+	 * @param bird, bird to test collision with
+	 */
 	private void testCollisions(Bird bird) {
 
 		boolean tested = true;
@@ -150,6 +206,11 @@ public class PipesHandler {
 
 	}
 
+	/**
+	 * draw all the pipe sets
+	 * 
+	 * @param g, tool to draw
+	 */
 	public void drawPipes(Graphics g) {
 
 		for (PipeSet pipe : pipes) {
@@ -158,6 +219,11 @@ public class PipesHandler {
 
 	}
 
+	/**
+	 * Update the game, the movements and test for collisions
+	 * 
+	 * @param bird, bird to test collisions with
+	 */
 	public void update(Bird bird) {
 		if (bird.isDying())
 			return;
