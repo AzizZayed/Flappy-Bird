@@ -10,6 +10,12 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
+/**
+ * main class, manages thread, drawing and updating physics/movement
+ * 
+ * @author Zayed
+ *
+ */
 public class Game extends Canvas implements Runnable {
 
 	private static final long serialVersionUID = 1L;
@@ -17,15 +23,15 @@ public class Game extends Canvas implements Runnable {
 	/**
 	 * Game dimensions, in pixels
 	 */
-	public final static int WIDTH = 350;
-	public final static int HEIGHT = 500;
+	private final static int WIDTH = 350;
+	private final static int HEIGHT = 500;
 
 	public final static float kGRAVITY = -4.0f; // gravity constant
 
-	public boolean running = false; // true if the game loop is running
+	private boolean running = false; // true if the game loop is running
 	private Thread gameThread; // thread where the game is updated AND rendered (single thread game)
 
-	public boolean gameStarted = false; // true if game has started
+	private boolean gameStarted = false; // true if game has started
 
 	// Game properties...
 	private Bird bird;
@@ -64,8 +70,16 @@ public class Game extends Canvas implements Runnable {
 	 */
 	private void initialize() {
 		// Initialize
-		bird = new Bird();
-		pipes = new PipesHandler();
+		bird = new Bird(WIDTH, HEIGHT);
+		pipes = new PipesHandler(WIDTH, HEIGHT);
+	}
+
+	/**
+	 * restart the game
+	 */
+	public void restart() {
+		gameStarted = false;
+		initialize();
 	}
 
 	/**
@@ -82,7 +96,7 @@ public class Game extends Canvas implements Runnable {
 			public void keyPressed(KeyEvent e) {
 				int code = e.getKeyCode();
 
-				if (code == KeyEvent.VK_SPACE || code == KeyEvent.VK_UP) {
+				if (code == KeyEvent.VK_SPACE || code == KeyEvent.VK_UP || code == KeyEvent.VK_W) {
 					bird.jump(-5.5f * kGRAVITY); // go against gravity
 					if (!gameStarted)
 						gameStarted = true;
@@ -101,6 +115,7 @@ public class Game extends Canvas implements Runnable {
 	@Override
 	public void run() {
 		// so you can keep your sanity, I won't explain the game loop... you're welcome
+		// I do have a video on it though
 
 		this.requestFocus();
 
@@ -127,7 +142,7 @@ public class Game extends Canvas implements Runnable {
 				uDeltaTime--;
 			}
 
-			while (fDeltaTime >= 1) {
+			if (fDeltaTime >= 1) {
 				render();
 				frames++;
 				fDeltaTime--;
@@ -153,7 +168,7 @@ public class Game extends Canvas implements Runnable {
 		gameThread = new Thread(this);
 		/*
 		 * since "this" is the "Game" Class you are in right now and it implements the
-		 * Runnable Interface we can give it to a thread constructor. That thread with
+		 * Runnable Interface we can give it to a thread constructor. That thread will
 		 * call it's "run" method which this class inherited (it's directly above)
 		 */
 		gameThread.start(); // start thread
@@ -211,7 +226,7 @@ public class Game extends Canvas implements Runnable {
 		if (gameStarted)
 			pipes.drawPipes(g);
 
-		bird.draw(g, gameStarted);
+		bird.draw(g, gameStarted, WIDTH, HEIGHT);
 
 		// actually draw
 		g.dispose();
@@ -222,41 +237,29 @@ public class Game extends Canvas implements Runnable {
 	/**
 	 * Draw background
 	 * 
-	 * @param g Graphics used to draw on the Canvas
+	 * @param g - Graphics used to draw on the Canvas
 	 */
 	private void drawBackground(Graphics g) {
 		// black background
 		g.setColor(new Color(155, 201, 234));
 		// g.fillRect(0, 0, WIDTH, HEIGHT);
 		g.fillRect(0, 0, getWidth(), getHeight());
-
-		// draw more background elements here
-
 	}
 
 	/**
 	 * update settings and move all objects
 	 * 
-	 * @param uDeltaTime
+	 * @param uDeltaTime - time between updates
 	 */
 	public void update(double uDeltaTime) {
 
 		// update Game Objects here
-		bird.animate();
-		if (gameStarted) {
-			bird.update(uDeltaTime);
-			pipes.update(bird);
-		}
-		if (bird.hitFloor())
-			restart();
-	}
+		bird.update(uDeltaTime, gameStarted);
+		if (gameStarted)
+			pipes.update(bird, HEIGHT);
 
-	/**
-	 * restart the game
-	 */
-	public void restart() {
-		gameStarted = false;
-		initialize();
+		if (bird.hitFloor(HEIGHT))
+			restart();
 	}
 
 	/**
